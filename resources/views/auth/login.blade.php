@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Login</title>
+  <title>Login</title>
 
   <!-- Custom fonts for this template-->
   <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -17,6 +17,9 @@
 
   <!-- Custom styles for this template-->
   <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+
+  <!-- SweetAlert CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
@@ -33,42 +36,34 @@
           <div class="card-body p-0">
             <!-- Nested Row within Card Body -->
             <div class="row">
-              <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+              <div class="col-lg-3 d-none d-lg-block bg-login-image"></div>
               <div class="col-lg-6">
                 <div class="p-5">
                   <div class="text-center">
-                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-                  </div>
+                    <!-- Tambahkan logo di sini -->
+                    <img src="{{ asset('img/logo_bapenda.png') }}" alt="Logo Bapenda Banjarbaru" class="mb-4" width="320px">
+                </div>
+
+                  <!-- Form Login -->
                   <form action="{{ route('login.aksi') }}" method="POST" class="user">
                     @csrf
-										@if ($errors->any())
-										<div class="alert alert-danger">
-											<ul>
-												@foreach ($errors->all() as $error)
-												<li>{{ $error }}</li>
-												@endforeach
-											</ul>
-										</div>
-										@endif
                     <div class="form-group">
-                      <input name="email" type="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address...">
+                      <input name="email" type="email" class="form-control form-control-user @error('email') is-invalid @enderror" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..." value="{{ old('email') }}">
+                      @error('email')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                      @enderror
                     </div>
+
                     <div class="form-group">
-                      <input name="password" type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password">
+                      <input name="password" type="password" class="form-control form-control-user @error('password') is-invalid @enderror" id="exampleInputPassword" placeholder="Password">
+                      @error('password')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                      @enderror
                     </div>
-                    <div class="form-group">
-                      <div class="custom-control custom-checkbox small">
-                        <input name="remember" type="checkbox" class="custom-control-input" id="customCheck">
-                        <label class="custom-control-label" for="customCheck">Remember
-                          Me</label>
-                      </div>
-                    </div>
+
                     <button type="submit" class="btn btn-primary btn-block btn-user">Login</button>
                   </form>
-                  <hr>
-                  <div class="text-center">
-                    <a class="small" href="{{ route('register') }}">Create an Account!</a>
-                  </div>
+
                 </div>
               </div>
             </div>
@@ -90,6 +85,25 @@
 
   <!-- Custom scripts for all pages-->
   <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+
+  <!-- SweetAlert for flash messages -->
+  <script>
+    @if(session('error'))
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '{{ session('error') }}',
+      });
+    @endif
+
+    @if(session('success'))
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: '{{ session('success') }}',
+      });
+    @endif
+  </script>
 
 </body>
 

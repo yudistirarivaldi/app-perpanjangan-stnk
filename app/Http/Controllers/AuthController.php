@@ -18,20 +18,26 @@ class AuthController extends Controller
 
 	public function registerSimpan(Request $request)
 	{
-		Validator::make($request->all(), [
+		$validator = Validator::make($request->all(), [
 			'nama' => 'required',
-			'email' => 'required|email',
-			'password' => 'required|confirmed'
-		])->validate();
-
+			'email' => 'required|email|unique:users,email', 
+			'password' => 'required|confirmed|min:6'
+		]);
+		
+		if ($validator->fails()) {
+			return redirect()->back()
+				->withErrors($validator)
+				->withInput()
+				->with('error', 'Gagal mendaftar! Periksa kembali data Anda.');
+		}
+		
 		User::create([
-			'nama' => $request->nama,
+			'name' => $request->nama,
 			'email' => $request->email,
 			'password' => Hash::make($request->password),
-			'level' => 'Admin'
 		]);
 
-		return redirect()->route('login');
+		return redirect()->route('login')->with('success', 'Akun berhasil didaftarkan. Silakan login.');
 	}
 
 	public function login()
@@ -41,20 +47,31 @@ class AuthController extends Controller
 
 	public function loginAksi(Request $request)
 	{
-		Validator::make($request->all(), [
+		// Validasi input dari form
+		$validator = Validator::make($request->all(), [
 			'email' => 'required|email',
 			'password' => 'required'
-		])->validate();
+		]);
 
-		if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
-			throw ValidationException::withMessages([
-				'email' => trans('auth.failed')
-			]);
+		// Jika validasi gagal, kembalikan ke halaman sebelumnya dengan pesan error
+		if ($validator->fails()) {
+			return redirect()->back()
+				->withErrors($validator)
+				->withInput()
+				->with('error', 'Gagal login! Periksa kembali email dan password Anda.');
 		}
 
+		// Coba otentikasi user
+		if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+			return redirect()->back()
+				->with('error', 'Email atau password salah, silakan coba lagi.');
+		}
+
+		// Regenerasi sesi setelah login sukses
 		$request->session()->regenerate();
 
-		return redirect()->route('dashboard');
+		// Redirect ke dashboard dengan pesan sukses
+		return redirect()->route('dashboard')->with('success', 'Selamat datang kembali!');
 	}
 
 	public function logout(Request $request)

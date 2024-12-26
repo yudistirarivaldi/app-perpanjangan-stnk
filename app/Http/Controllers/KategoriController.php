@@ -2,41 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kategori;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class KategoriController extends Controller
 {
 	public function index()
 	{
-		$kategori = Kategori::get();
-
+		$kategori = Category::get();
 		return view('kategori/index', ['kategori' => $kategori]);
 	}
 
-	public function tambah()
+	public function create()
 	{
 		return view('kategori.form');
 	}
 
-	public function simpan(Request $request)
-	{
-		Kategori::create(['nama' => $request->nama]);
+	public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|unique:categories,name',
+            'description' => 'nullable',
+        ]);
 
-		return redirect()->route('kategori');
-	}
+        Category::create($request->all());
+
+        return redirect()->route('kategori')->with('success', 'Kategori berhasil ditambahkan!');
+    }
 
 	public function edit($id)
-	{
-		$kategori = Kategori::find($id)->first();
+    {
+        $category = Category::findOrFail($id);
+        return view('kategori.form', compact('category'));
+    }
 
-		return view('kategori.form', ['kategori' => $kategori]);
-	}
+	public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|unique:categories,name,' . $id,
+            'description' => 'nullable',
+        ]);
 
-	public function update($id, Request $request)
-	{
-		Kategori::find($id)->update(['nama' => $request->nama]);
+        $category = Category::findOrFail($id);
+        $category->update($request->all());
 
-		return redirect()->route('kategori');
-	}
+        return redirect()->route('kategori')->with('success', 'Kategori berhasil diperbarui!');
+    }
+
+	public function destroy($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->delete();
+
+        return redirect()->route('kategori')->with('success', 'Kategori berhasil dihapus!');
+    }
 }

@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $time = Time::findOrFail(1);
-        $schedule->command('tax:reminder')->dailyAt('13:04');
+        $schedule->command('tax:reminder')->dailyAt($time->jam);
     }
 
     /**
